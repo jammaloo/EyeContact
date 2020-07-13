@@ -1,32 +1,91 @@
 import Matter from 'matter-js'
+import Eye from './eye.png';
 
-// module aliases
 var Engine = Matter.Engine,
   Render = Matter.Render,
+  Runner = Matter.Runner,
+  Composites = Matter.Composites,
+  Common = Matter.Common,
+  MouseConstraint = Matter.MouseConstraint,
+  Mouse = Matter.Mouse,
   World = Matter.World,
   Bodies = Matter.Bodies;
 
-// create an engine
-var engine = Engine.create();
+// create engine
+var engine = Engine.create(),
+  world = engine.world;
 
-// create a renderer
+// create renderer
 var render = Render.create({
   element: document.body,
   engine: engine,
   options: {
+    width: 800,
+    height: 600,
+    background: '#0f0f13',
+    showAngleIndicator: false,
+    wireframes: false
   }
 });
 
-// create two boxes and a ground
-var boxA = Bodies.rectangle(400, 200, 80, 80);
-var boxB = Bodies.rectangle(450, 50, 80, 80);
-var ground = Bodies.rectangle(400, 610, 810, 60, { isStatic: true });
-
-// add all of the bodies to the world
-World.add(engine.world, [boxA, boxB, ground]);
-
-// run the engine
-Engine.run(engine);
-
-// run the renderer
 Render.run(render);
+
+// create runner
+var runner = Runner.create();
+Runner.run(runner, engine);
+
+// add bodies
+var offset = 10,
+  options = {
+    isStatic: true
+  };
+
+world.bodies = [];
+
+// these static walls will not be rendered in this sprites example, see options
+World.add(world, [
+  Bodies.rectangle(400, -offset, 800.5 + 2 * offset, 50.5, options),
+  Bodies.rectangle(400, 600 + offset, 800.5 + 2 * offset, 50.5, options),
+  Bodies.rectangle(800 + offset, 300, 50.5, 600.5 + 2 * offset, options),
+  Bodies.rectangle(-offset, 300, 50.5, 600.5 + 2 * offset, options)
+]);
+
+var stack = Composites.stack(20, 20, 10, 4, 0, 0, function (x, y) {
+    return Bodies.circle(x, y, 46, {
+      density: 0.0005,
+      frictionAir: 0.06,
+      restitution: 0.3,
+      friction: 0.01,
+      render: {
+        sprite: {
+          texture: Eye,
+        }
+      }
+    });
+});
+
+World.add(world, stack);
+
+// add mouse control
+var mouse = Mouse.create(render.canvas),
+  mouseConstraint = MouseConstraint.create(engine, {
+    mouse: mouse,
+    constraint: {
+      stiffness: 0.2,
+      render: {
+        visible: false
+      }
+    }
+  });
+
+World.add(world, mouseConstraint);
+
+// keep the mouse in sync with rendering
+render.mouse = mouse;
+
+// fit the render viewport to the scene
+Render.lookAt(render, {
+  min: {x: 0, y: 0},
+  max: {x: 800, y: 600}
+});
+
