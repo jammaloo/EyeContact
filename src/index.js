@@ -4,12 +4,14 @@ import Eye from './eye.png';
 var Engine = Matter.Engine,
   Render = Matter.Render,
   Runner = Matter.Runner,
+  Body = Matter.Body,
+  Bodies = Matter.Bodies,
   Composites = Matter.Composites,
-  Common = Matter.Common,
+  Composite = Matter.Composite,
+  Constraint = Matter.Constraint,
   MouseConstraint = Matter.MouseConstraint,
   Mouse = Matter.Mouse,
-  World = Matter.World,
-  Bodies = Matter.Bodies;
+  World = Matter.World;
 
 // create engine
 var engine = Engine.create(),
@@ -34,37 +36,34 @@ Render.run(render);
 var runner = Runner.create();
 Runner.run(runner, engine);
 
+function newtonsCradle(xx, yy, number, size, length) {
+  var newtonsCradle = Composite.create({ label: 'Newtons Cradle' });
+
+  for (var i = 0; i < number; i++) {
+    var separation = 1.9,
+      circle = Bodies.circle(xx + i * (size * separation), yy + length, size,
+        { inertia: Infinity, restitution: 1, friction: 0, frictionAir: 0.0001, slop: 1, render: {
+            sprite: {
+              texture: Eye,
+            }
+          } }),
+      constraint = Constraint.create({ pointA: { x: xx + i * (size * separation), y: yy }, bodyB: circle });
+
+    Composite.addBody(newtonsCradle, circle);
+    Composite.addConstraint(newtonsCradle, constraint);
+  }
+
+  return newtonsCradle;
+};
+
 // add bodies
-var offset = 10,
-  options = {
-    isStatic: true
-  };
+var cradle = newtonsCradle(280, 100, 5, 30, 200);
+World.add(world, cradle);
+Body.translate(cradle.bodies[0], { x: -180, y: -100 });
 
-world.bodies = [];
-
-// these static walls will not be rendered in this sprites example, see options
-World.add(world, [
-  Bodies.rectangle(400, -offset, 800.5 + 2 * offset, 50.5, options),
-  Bodies.rectangle(400, 600 + offset, 800.5 + 2 * offset, 50.5, options),
-  Bodies.rectangle(800 + offset, 300, 50.5, 600.5 + 2 * offset, options),
-  Bodies.rectangle(-offset, 300, 50.5, 600.5 + 2 * offset, options)
-]);
-
-var stack = Composites.stack(20, 20, 10, 4, 0, 0, function (x, y) {
-    return Bodies.circle(x, y, 46, {
-      density: 0.0005,
-      frictionAir: 0.06,
-      restitution: 0.3,
-      friction: 0.01,
-      render: {
-        sprite: {
-          texture: Eye,
-        }
-      }
-    });
-});
-
-World.add(world, stack);
+cradle = newtonsCradle(280, 380, 7, 20, 140);
+World.add(world, cradle);
+Body.translate(cradle.bodies[0], { x: -140, y: -100 });
 
 // add mouse control
 var mouse = Mouse.create(render.canvas),
@@ -85,7 +84,6 @@ render.mouse = mouse;
 
 // fit the render viewport to the scene
 Render.lookAt(render, {
-  min: {x: 0, y: 0},
-  max: {x: 800, y: 600}
+  min: { x: 0, y: 50 },
+  max: { x: 800, y: 600 }
 });
-
