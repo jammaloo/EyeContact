@@ -27,7 +27,7 @@ var engine = Engine.create(),
 
 // create renderer
 var render = Render.create({
-  element: document.body,
+  element: document.getElementById('eye_contact'),
   engine: engine,
   options: {
     width: 1000,

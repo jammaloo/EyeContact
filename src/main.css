@@ -1,4 +1,13 @@
 body {
     background-color: #90b4ea;
     text-align: center;
+    padding: 0;
+    border: 0;
+}
+
+#eye_contact canvas {
+    width: 80vw;
+    height: 64vw;
+    max-width: 1000px;
+    max-height: 800px;
 }
