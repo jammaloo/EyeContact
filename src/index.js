@@ -1,3 +1,5 @@
+import './main.css';
+
 import Matter from 'matter-js'
 import Eye1 from './eye100-1.png';
 import Eye2 from './eye100-2.png';
